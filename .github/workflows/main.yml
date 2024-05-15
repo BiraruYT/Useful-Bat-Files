@@ -1,0 +1,31 @@
+name: Run Batch File
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-batch:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Find and run batch file
+      run: |
+        echo "Searching for .bat files..."
+        for /r %%i in (*.bat) do (
+          echo "Found batch file: %%i"
+          set "BATCH_FILE=%%i"
+          goto :found
+        )
+        echo "No batch file found"
+        exit /b 1
+        :found
+        echo "Running batch file %BATCH_FILE%"
+        cmd /c %BATCH_FILE%
+      shell: cmd
